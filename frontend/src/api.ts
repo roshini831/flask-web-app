@@ -49,7 +49,7 @@ class ApiClient {
   private accessToken: string | null = null;
   private refreshToken: string | null = null;
 
-  constructor(baseURL: string = 'http://localhost:5001') {
+  constructor(baseURL: string = '') {
     this.client = axios.create({
       baseURL,
       headers: {
@@ -137,10 +137,15 @@ class ApiClient {
     pages: number;
     current_page: number;
   }> {
-    const response = await this.client.get('/api/projects', {
-      params: { page, per_page: perPage },
-    });
-    return response.data;
+    try {
+      const response = await this.client.get('/api/projects', {
+        params: { page, per_page: perPage },
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('getProjects error:', error.response?.data || error.message);
+      throw error;
+    }
   }
 
   async getProject(id: number): Promise<{ project: Project }> {
@@ -149,8 +154,19 @@ class ApiClient {
   }
 
   async createProject(name: string, description?: string): Promise<{ project: Project }> {
-    const response = await this.client.post('/api/projects', { name, description });
-    return response.data;
+    try {
+      console.log('Creating project with:', { name, description, token: this.accessToken?.substring(0, 20) });
+      const response = await this.client.post('/api/projects', { name, description });
+      console.log('Project created:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('createProject error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      throw new Error(error.response?.data?.error || error.message || 'Failed to create project');
+    }
   }
 
   async updateProject(

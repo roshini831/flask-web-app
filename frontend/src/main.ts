@@ -164,6 +164,12 @@ function showDashboard() {
   });
 
   document.getElementById('newProjectBtn')!.addEventListener('click', showNewProjectModal);
+  
+  const newTaskBtn = document.getElementById('newTaskBtn');
+  if (newTaskBtn) {
+    newTaskBtn.addEventListener('click', showNewTaskModal);
+  }
+  
   renderProjects();
 }
 
@@ -240,10 +246,44 @@ function showNewProjectModal() {
   `);
 
   const buttons = modal.querySelector('.modal-buttons')!;
-  buttons.innerHTML = `
-    <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-    <button class="btn-primary" onclick="createNewProject()">Create</button>
-  `;
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn-secondary';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', closeModal);
+
+  const createBtn = document.createElement('button');
+  createBtn.className = 'btn-primary';
+  createBtn.textContent = 'Create';
+  createBtn.addEventListener('click', createNewProject);
+
+  buttons.appendChild(cancelBtn);
+  buttons.appendChild(createBtn);
+}
+
+function showNewTaskModal() {
+  const modal = createModal('New Task', `
+    <input type="text" id="taskTitle" placeholder="Task title" />
+    <textarea id="taskDescription" placeholder="Description (optional)"></textarea>
+    <select id="taskPriority">
+      <option value="low">Low Priority</option>
+      <option value="medium" selected>Medium Priority</option>
+      <option value="high">High Priority</option>
+    </select>
+  `);
+
+  const buttons = modal.querySelector('.modal-buttons')!;
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn-secondary';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', closeModal);
+
+  const createBtn = document.createElement('button');
+  createBtn.className = 'btn-primary';
+  createBtn.textContent = 'Create Task';
+  createBtn.addEventListener('click', createNewTask);
+
+  buttons.appendChild(cancelBtn);
+  buttons.appendChild(createBtn);
 }
 
 function createModal(title: string, content: string): HTMLElement {
@@ -286,6 +326,32 @@ async function createNewProject() {
     renderProjects();
   } catch (error) {
     alert('Failed to create project: ' + (error as any).message);
+  }
+}
+
+async function createNewTask() {
+  const title = (document.getElementById('taskTitle') as HTMLInputElement).value;
+  const description = (document.getElementById('taskDescription') as HTMLTextAreaElement).value;
+  const priority = (document.getElementById('taskPriority') as HTMLSelectElement).value as string;
+
+  if (!title.trim()) {
+    alert('Please enter a task title');
+    return;
+  }
+
+  if (!state.selectedProject) {
+    alert('Please select a project first');
+    return;
+  }
+
+  try {
+    await api.createTask(state.selectedProject.id, title, description || undefined, undefined, priority);
+    closeModal();
+    const tasksResult = await api.getProjectTasks(state.selectedProject.id);
+    state.tasks = tasksResult.tasks;
+    renderSelectedProject();
+  } catch (error) {
+    alert('Failed to create task: ' + (error as any).message);
   }
 }
 
