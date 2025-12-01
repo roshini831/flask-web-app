@@ -1,4 +1,10 @@
 """Pytest configuration and fixtures."""
+import sys
+from pathlib import Path
+
+# Add the project root to the Python path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import pytest
 from app import create_app
 from app.models import db, User, Project, Task
