@@ -1,40 +1,23 @@
-from flask import Flask, jsonify, render_template_string
+"""Main application entry point."""
+import os
+from app import create_app
+from app.models import db
 
-app = Flask(__name__)
+# Create Flask application
+app = create_app(os.environ.get('FLASK_ENV', 'development'))
 
-# Sample REST API endpoint
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    return jsonify({"message": "Hello, World!"})
 
-# HTML template with a button
-html_template = '''
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Sample Web App</title>
-    <script>
-        function fetchData() {
-            fetch('/api/data')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('result').innerText = data.message;
-                });
-        }
-    </script>
-</head>
-<body>
-    <h1>Sample Web App</h1>
-    <button onclick="fetchData()">Fetch Data</button>
-    <p id="result"></p>
-</body>
-</html>
-'''
+@app.shell_context_processor
+def make_shell_context():
+    """Provide shell context for Flask CLI."""
+    return {'db': db}
 
-@app.route('/')
-def home():
-    return render_template_string(html_template)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    # Development server
+    port = int(os.environ.get('PORT', 5001))
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=os.environ.get('FLASK_ENV') == 'development'
+    )
