@@ -8,6 +8,12 @@ from app.schemas import (
     TaskResponseSchema
 )
 from app.utils.auth import token_required
+from app.utils.google_calendar import (
+    create_calendar_event,
+    update_calendar_event,
+    delete_calendar_event
+)
+from app.models import User
 
 tasks_bp = Blueprint('tasks', __name__, url_prefix='/api/tasks')
 
@@ -97,11 +103,20 @@ def create_task(project_id):
             description=data.get('description'),
             project_id=project_id,
             assignee_id=data.get('assignee_id'),
-            priority=data.get('priority', 'medium')
+            priority=data.get('priority', 'medium'),
+            due_date=data.get('due_date')
         )
 
         db.session.add(task)
         db.session.commit()
+        
+        # Sync with Google Calendar
+        user = User.query.get(request.user_id)
+        if user and task.due_date:
+            event_id = create_calendar_event(user, task)
+            if event_id:
+                task.google_event_id = event_id
+                db.session.commit()
 
         return jsonify({
             'message': 'Task created successfully',
@@ -148,8 +163,15 @@ def update_task(task_id):
             task.priority = data['priority']
         if 'assignee_id' in data:
             task.assignee_id = data['assignee_id']
+        if 'due_date' in data:
+            task.due_date = data['due_date']
 
         db.session.commit()
+        
+        # Sync with Google Calendar
+        user = User.query.get(request.user_id)
+        if user:
+            update_calendar_event(user, task)
 
         return jsonify({
             'message': 'Task updated successfully',
@@ -182,6 +204,11 @@ def delete_task(task_id):
 
         db.session.delete(task)
         db.session.commit()
+        
+        # Sync with Google Calendar
+        user = User.query.get(request.user_id)
+        if user:
+            delete_calendar_event(user, task)
 
         return jsonify({'message': 'Task deleted successfully'}), 200
 

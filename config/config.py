@@ -15,6 +15,11 @@ class Config:
     # Security
     JWT_ALGORITHM = 'HS256'
     BCRYPT_LOG_ROUNDS = 12
+    
+    # Google OAuth
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+    GOOGLE_REDIRECT_URI = 'http://localhost:5001/api/auth/google/callback'
 
 
 class DevelopmentConfig(Config):

@@ -106,6 +106,7 @@ def token_required(f):
                 return jsonify({'error': 'Invalid token format'}), 401
         
         if not token:
+            print("DEBUG: Token is missing")
             return jsonify({'error': 'Token is missing'}), 401
         
         try:
@@ -113,7 +114,11 @@ def token_required(f):
             request.user_id = payload['user_id']
             request.username = payload['username']
         except AuthenticationError as e:
+            print(f"DEBUG: Authentication error: {str(e)}")
             return jsonify({'error': str(e)}), 401
+        except Exception as e:
+            print(f"DEBUG: Unexpected error in token_required: {str(e)}")
+            return jsonify({'error': 'Token validation failed'}), 401
         
         return f(*args, **kwargs)
     

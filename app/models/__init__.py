@@ -17,6 +17,9 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, default=True, index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Google Integration
+    google_credentials = db.Column(db.Text)  # JSON string of credentials
 
     # Relationships
     projects = db.relationship('Project', backref='owner', lazy=True, cascade='all, delete-orphan')
@@ -80,6 +83,8 @@ class Task(db.Model):
     assignee_id = db.Column(db.Integer, db.ForeignKey('users.id'), index=True)
     status = db.Column(db.String(50), default='todo')  # todo, in_progress, completed
     priority = db.Column(db.String(20), default='medium')  # low, medium, high
+    due_date = db.Column(db.DateTime)
+    google_event_id = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -95,6 +100,8 @@ class Task(db.Model):
             'assignee_id': self.assignee_id,
             'status': self.status,
             'priority': self.priority,
+            'due_date': self.due_date.isoformat() if self.due_date else None,
+            'google_event_id': self.google_event_id,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }

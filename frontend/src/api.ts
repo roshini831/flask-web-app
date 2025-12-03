@@ -1,7 +1,7 @@
 /**
  * API client for Flask backend communication
  */
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 interface AuthTokens {
   access_token: string;
@@ -40,6 +40,8 @@ interface Task {
   assignee_id?: number;
   status: string;
   priority: string;
+  due_date?: string;
+  google_event_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -210,13 +212,15 @@ class ApiClient {
     title: string,
     description?: string,
     assigneeId?: number,
-    priority?: string
+    priority?: string,
+    dueDate?: string
   ): Promise<{ task: Task }> {
     const response = await this.client.post(`/api/tasks/project/${projectId}`, {
       title,
       description,
       assignee_id: assigneeId,
       priority,
+      due_date: dueDate,
     });
     return response.data;
   }
@@ -227,7 +231,8 @@ class ApiClient {
     description?: string,
     status?: string,
     priority?: string,
-    assigneeId?: number
+    assigneeId?: number,
+    dueDate?: string
   ): Promise<{ task: Task }> {
     const response = await this.client.put(`/api/tasks/${id}`, {
       title,
@@ -235,6 +240,7 @@ class ApiClient {
       status,
       priority,
       assignee_id: assigneeId,
+      due_date: dueDate,
     });
     return response.data;
   }
@@ -247,6 +253,11 @@ class ApiClient {
   // Health check
   async healthCheck(): Promise<{ status: string }> {
     const response = await this.client.get('/api/health');
+    return response.data;
+  }
+  // Google Calendar
+  async connectGoogleCalendar(): Promise<{ authorization_url: string }> {
+    const response = await this.client.get('/api/auth/google/connect');
     return response.data;
   }
 }

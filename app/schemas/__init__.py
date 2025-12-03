@@ -78,6 +78,7 @@ class TaskCreateSchema(Schema):
         validate=validate.OneOf(['low', 'medium', 'high']),
         load_default='medium'
     )
+    due_date = fields.DateTime(allow_none=True)
 
 
 class TaskUpdateSchema(Schema):
@@ -91,6 +92,7 @@ class TaskUpdateSchema(Schema):
     priority = fields.Str(
         validate=validate.OneOf(['low', 'medium', 'high'])
     )
+    due_date = fields.DateTime(allow_none=True)
 
 
 class TaskResponseSchema(Schema):
@@ -102,6 +104,8 @@ class TaskResponseSchema(Schema):
     assignee_id = fields.Int()
     status = fields.Str()
     priority = fields.Str()
+    due_date = fields.DateTime()
+    google_event_id = fields.Str()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
 

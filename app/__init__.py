@@ -9,6 +9,7 @@ from app.routes.auth import auth_bp
 from app.routes.projects import projects_bp
 from app.routes.tasks import tasks_bp
 from app.routes.health import health_bp
+from app.routes.google_auth import google_auth_bp
 
 
 def create_app(config_name: str = None):
@@ -29,6 +30,7 @@ def create_app(config_name: str = None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(projects_bp)
     app.register_blueprint(tasks_bp)
+    app.register_blueprint(google_auth_bp)
 
     # Error handlers
     @app.errorhandler(404)
