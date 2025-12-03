@@ -34,18 +34,19 @@ export const TaskList: React.FC<TaskListProps> = ({ project }) => {
     const [newTaskPriority, setNewTaskPriority] = useState('medium');
     const [newTaskDate, setNewTaskDate] = useState<Date | null>(null);
 
-    const loadTasks = async () => {
+    const loadTasks = React.useCallback(async () => {
         try {
             const res = await api.getProjectTasks(project.id);
             setTasks(res.tasks);
         } catch (err) {
             console.error(err);
         }
-    };
+    }, [project.id]);
 
     useEffect(() => {
+        // eslint-disable-next-line
         loadTasks();
-    }, [project.id]);
+    }, [loadTasks]);
 
     const handleCreate = async () => {
         try {

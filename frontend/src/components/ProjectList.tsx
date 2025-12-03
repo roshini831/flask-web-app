@@ -29,18 +29,19 @@ export const ProjectList: React.FC<ProjectListProps> = ({ selectedId, onSelect }
     const [newProjectName, setNewProjectName] = useState('');
     const [newProjectDesc, setNewProjectDesc] = useState('');
 
-    const loadProjects = async () => {
+    const loadProjects = React.useCallback(async () => {
         try {
             const res = await api.getProjects();
             setProjects(res.projects);
         } catch (err) {
             console.error(err);
         }
-    };
+    }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line
         loadProjects();
-    }, []);
+    }, [loadProjects]);
 
     const handleCreate = async () => {
         try {
